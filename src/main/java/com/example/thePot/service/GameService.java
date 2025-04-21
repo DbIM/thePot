@@ -1,5 +1,6 @@
 package com.example.thePot.service;
 
+import com.example.thePot.dto.GameState;
 import com.example.thePot.player.Player;
 import com.example.thePot.player.Team;
 import com.example.thePot.room.GameRoom;
@@ -15,6 +16,18 @@ public class GameService {
     private static final Logger log = LoggerFactory.getLogger(GameService.class);
     private final Map<String, GameRoom> rooms = new HashMap<>();
     private final Map<String, RoundTimer> timers = new HashMap<>();
+
+    public GameState getGameState(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room == null || room.getRemainingWords() == null || room.getRemainingWords().isEmpty()) {
+            return new GameState("", 12000); // Возвращаем пустое состояние
+        }
+
+        // Берем первое слово из оставшихся
+        String currentWord = room.getRemainingWords().getFirst();
+
+        return new GameState(currentWord, 12000); // Фиксированное время 12 секунд
+    }
 
     public String createRoom(String playerName) {
         String roomId = UUID.randomUUID().toString();
@@ -70,7 +83,7 @@ public class GameService {
     private void selectFirstTeam(GameRoom room) {
         if (room.getTeams() == null || room.getTeams().isEmpty()) return;
 
-        room.setCurrentTeam(room.getTeams().get(0));
+        room.setCurrentTeam(room.getTeams().getFirst());
         List<Player> teamPlayers = room.getCurrentTeam().getPlayers();
 
         if (teamPlayers != null && !teamPlayers.isEmpty()) {

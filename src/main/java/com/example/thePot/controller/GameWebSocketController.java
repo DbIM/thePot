@@ -1,5 +1,6 @@
 package com.example.thePot.controller;
 
+import com.example.thePot.dto.GameState;
 import com.example.thePot.room.GameRoom;
 import com.example.thePot.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +10,19 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class GameWebSocketController {
-    private final GameService gameService;
 
     @Autowired
-    public GameWebSocketController(GameService gameService) {
-        this.gameService = gameService;
-    }
+    private GameService gameService;
 
-    @MessageMapping("/start")
+    @MessageMapping("/next-word")
     @SendTo("/topic/game-progress")
-    public GameRoom startGame(String roomId) {
-        gameService.startGame(roomId);
-        return gameService.getRoom(roomId);
+    public GameState nextWord(String roomId) {
+        // Удаляем угаданное слово из списка
+        GameRoom room = gameService.getRoom(roomId);
+        if (room != null && !room.getRemainingWords().isEmpty()) {
+            room.getRemainingWords().removeFirst();
+        }
+
+        return gameService.getGameState(roomId);
     }
 }

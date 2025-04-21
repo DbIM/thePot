@@ -1,12 +1,17 @@
 import React from 'react';
-import TeamLobby from './pages/WelcomeScreen';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import GameScreen from './components/GameScreen';
+import LobbyScreen from './components/LobbyScreen';
 
 function App() {
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <TeamLobby />
-    </div>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<LobbyScreen />} />
+                <Route path="/game" element={<GameScreen />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

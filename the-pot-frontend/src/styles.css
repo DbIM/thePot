@@ -1,0 +1,15 @@
+.game-container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+#timer {
+    font-size: 3em;
+    color: #f44336;
+}
+
+#current-word {
+    font-size: 2em;
+    margin: 20px;
+    min-height: 50px;
+}
