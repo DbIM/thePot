@@ -2,34 +2,34 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.4</version>
+		<version>3.1.5</version>
 		<relativePath/>
 	</parent>
 
 	<groupId>com.example</groupId>
-	<artifactId>backend</artifactId>
+	<artifactId>thePot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>thePot</name>
-	<description>Kastrula</description>
+	<description>Game project</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
+		<node.version>v22.14.0</node.version>
+		<npm.version>10.9.2</npm.version>
+		<frontend-maven-plugin.version>1.13.3</frontend-maven-plugin.version>
 	</properties>
 
 	<dependencies>
-		<!-- Spring Boot Web -->
+		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
-		<!-- WebSocket -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
@@ -39,10 +39,10 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
-		<!-- Testing -->
+		<!-- Тестирование -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -52,46 +52,41 @@
 
 	<build>
 		<plugins>
-			<!-- Compiler plugin with annotation processing -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<configuration>
-					<source>21</source>
-					<target>21</target>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>1.18.30</version>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-
-			<!-- Spring Boot plugin -->
+			<!-- Spring Boot -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.13.3</version> <!-- Обновленная версия -->
+				<version>1.13.3</version>
+				<configuration>
+					<workingDirectory>${project.basedir}/the-pot-frontend</workingDirectory>
+					<installDirectory>${project.basedir}/target</installDirectory>
+				</configuration>
 				<executions>
 					<execution>
-						<id>install node and npm</id>
+						<id>install-node-and-npm</id>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
-							<nodeVersion>v16.20.2</nodeVersion> <!-- Актуальная LTS -->
+							<nodeVersion>v18.20.2</nodeVersion>
+							<npmVersion>10.9.2</npmVersion>
 						</configuration>
 					</execution>
 					<execution>
-						<id>npm install</id>
+						<id>npm-install</id>
 						<goals>
 							<goal>npm</goal>
 						</goals>
@@ -101,6 +96,9 @@
 					</execution>
 				</executions>
 			</plugin>
+
+
 		</plugins>
 	</build>
+
 </project>

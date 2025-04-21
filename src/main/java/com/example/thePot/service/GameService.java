@@ -24,7 +24,7 @@ public class GameService {
         }
 
         // Берем первое слово из оставшихся
-        String currentWord = room.getRemainingWords().getFirst();
+        String currentWord = room.getRemainingWords().get(0);
 
         return new GameState(currentWord, 12000); // Фиксированное время 12 секунд
     }
@@ -83,7 +83,7 @@ public class GameService {
     private void selectFirstTeam(GameRoom room) {
         if (room.getTeams() == null || room.getTeams().isEmpty()) return;
 
-        room.setCurrentTeam(room.getTeams().getFirst());
+        room.setCurrentTeam(room.getTeams().get(0));
         List<Player> teamPlayers = room.getCurrentTeam().getPlayers();
 
         if (teamPlayers != null && !teamPlayers.isEmpty()) {

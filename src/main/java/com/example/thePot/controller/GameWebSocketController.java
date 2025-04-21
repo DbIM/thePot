@@ -20,7 +20,7 @@ public class GameWebSocketController {
         // Удаляем угаданное слово из списка
         GameRoom room = gameService.getRoom(roomId);
         if (room != null && !room.getRemainingWords().isEmpty()) {
-            room.getRemainingWords().removeFirst();
+            room.getRemainingWords().remove(0);
         }
 
         return gameService.getGameState(roomId);
