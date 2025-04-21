@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import GameScreen from './components/GameScreen';
-import LobbyScreen from './components/LobbyScreen';
+import GameScreen from './pages/GameScreen';
+import LobbyScreen from './pages/LobbyScreen';
 
 function App() {
     return (
