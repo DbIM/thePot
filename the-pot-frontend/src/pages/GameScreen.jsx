@@ -1,16 +1,21 @@
-import React, { useEffect } from 'react';
-import { connect } from './websocket';
+// src/pages/GameScreen.jsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function GameScreen() {
-    useEffect(() => {
-        connect();
-    }, []);
+const GameScreen = () => {
+    const navigate = useNavigate();
+
+    const handleEndRound = () => {
+        navigate("/final");
+    };
 
     return (
-        <div className="game-container">
-            <div id="timer">12</div>
-            <div id="current-word"></div>
-            <button onClick={() => stompClient.send("/app/next-word")}>Угадано</button>
+        <div style={{ padding: "2rem" }}>
+            <h2>Игровой экран</h2>
+            <p>Здесь будет происходить раунд</p>
+            <button onClick={handleEndRound}>Завершить игру</button>
         </div>
     );
-}
+};
+
+export default GameScreen;
