@@ -94,6 +94,27 @@
 							<arguments>install --force --legacy-peer-deps</arguments>
 						</configuration>
 					</execution>
+
+					<execution>
+						<id>npm-install-router</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install react-router-dom@6.20.1</arguments>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>install-tailwind</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install tailwindcss-animate</arguments>
+						</configuration>
+					</execution>
+
 				</executions>
 			</plugin>
 
