@@ -1,7 +1,9 @@
 package com.example.thePot.controller;
 
+import com.example.thePot.dto.GameState;
 import com.example.thePot.player.Player;
 import com.example.thePot.player.Team;
+import com.example.thePot.room.GameRoom;
 import com.example.thePot.service.GameService;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +40,19 @@ public class GameController {
         gameService.submitWords(roomId, playerName, words);
     }
 
+    @PostMapping("/start/{roomId}")
+    public void startGame(@PathVariable String roomId) {
+        gameService.startGame(roomId);
+    }
+
     @GetMapping("/room/{roomId}/teams")
     public List<Team> getTeams(@PathVariable String roomId) {
-        return gameService.getTeams(roomId);
+        GameRoom room = gameService.getRoom(roomId);
+        return room.getTeams();
+    }
+
+    @GetMapping("/state/{roomId}")
+    public GameState getGameState(@PathVariable String roomId) {
+        return gameService.getGameState(roomId);
     }
 }

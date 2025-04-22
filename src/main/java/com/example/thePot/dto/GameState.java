@@ -1,15 +1,15 @@
 package com.example.thePot.dto;
 
+import com.example.thePot.player.Team;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameState {
-    private String word; // Используем существующее поле из GameRoom
-    private int roundTime; // В миллисекундах (12 секунд = 12000)
-
-    // Конструктор
-    public GameState(String word, int roundTime) {
-        this.word = word;
-        this.roundTime = roundTime;
-    }
+    private int currentRound;
+    private Team activeTeam;
+    private String currentWord;
 }

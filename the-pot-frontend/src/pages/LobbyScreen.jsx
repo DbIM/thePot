@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function LobbyScreen() {
     const { roomId } = useParams();
@@ -8,6 +9,25 @@ export default function LobbyScreen() {
     const [players, setPlayers] = useState([]);
     const [yourName, setYourName] = useState("");
     const [teams, setTeams] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (teams.length > 0) {
+            const timeout = setTimeout(() => {
+                navigate(`/game/${roomId}`);
+            }, 3000); // ждём 3 секунды и уходим на игру
+            return () => clearTimeout(timeout);
+        }
+    }, [teams, roomId, navigate]);
+
+    useEffect(() => {
+        const fetchRoom = async () => {
+            const res = await fetch(`/api/game/room/${roomId}`);
+            const data = await res.json();
+            setIsHost(data.host.name === yourName);
+        };
+        fetchRoom();
+    }, [roomId, yourName]);
 
     useEffect(() => {
         console.log("👤 playerName in localStorage:", localStorage.getItem("playerName"));
@@ -47,6 +67,32 @@ export default function LobbyScreen() {
         return () => clearInterval(interval);
     }, [roomId]);
 
+    useEffect(() => {
+        const allReady = players.length > 0 && players.every(p => p.ready);
+        if (allReady) {
+            const fetchTeams = async () => {
+                try {
+                    const res = await fetch(`/api/game/room/${roomId}/teams`);
+                    const data = await res.json();
+                    setTeams(data);
+                } catch (e) {
+                    console.error("Ошибка при получении команд:", e);
+                }
+            };
+
+            const startGame = async () => {
+                try {
+                    await fetch(`/api/game/start/${roomId}`, { method: "POST" });
+                    fetchTeams(); // потом показать команды
+                } catch (e) {
+                    console.error("Ошибка при старте игры:", e);
+                }
+            };
+
+            startGame();
+        }
+    }, [players, roomId]);
+
     const handleWordChange = (value, index) => {
         const updated = [...words];
         updated[index] = value;
@@ -66,13 +112,13 @@ export default function LobbyScreen() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Ошибка при отправке слов");
+                const text = await res.text(); // читаем текст ошибки!
+                alert(`Ошибка: ${text}`);
+                return;
             }
 
             setIsReady(true);
         } catch (e) {
-            setError(e.message);
             console.error("Ошибка отправки слов:", e);
         }
     };

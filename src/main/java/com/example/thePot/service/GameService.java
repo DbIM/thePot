@@ -8,7 +8,11 @@ import com.example.thePot.timer.RoundTimer;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,22 +29,13 @@ public class GameService {
         log.info("Rooms cleared at startup.");
     }
 
-    public List<Team> getTeams(String roomId) {
-        GameRoom room = rooms.get(roomId);
-        if (room == null) throw new IllegalArgumentException("Room not found");
-        return room.getTeams() != null ? room.getTeams() : Collections.emptyList();
-    }
-
     public GameState getGameState(String roomId) {
         GameRoom room = rooms.get(roomId);
-        if (room == null || room.getRemainingWords() == null || room.getRemainingWords().isEmpty()) {
-            return new GameState("", 12000); // Возвращаем пустое состояние
+        if (room == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Комната не найдена");
         }
 
-        // Берем первое слово из оставшихся
-        String currentWord = room.getRemainingWords().get(0);
-
-        return new GameState(currentWord, 12000); // Фиксированное время 12 секунд
+        return new GameState(room.getCurrentRound(), room.getCurrentTeam(), room.getCurrentWord());
     }
 
     public String createRoom(String playerName) {
@@ -142,6 +137,10 @@ public class GameService {
         selectFirstTeam(room);
         selectNextExplainer(room);
 
+        if (!room.getRemainingWords().isEmpty()) {
+            room.setCurrentWord(room.getRemainingWords().remove(0));
+        }
+
         RoundTimer timer = new RoundTimer();
         timer.startTimer(() -> endTurn(roomId));
         timers.put(roomId, timer);
@@ -209,5 +208,10 @@ public class GameService {
 
         player.setWords(newWords);
         player.setReady(true);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }

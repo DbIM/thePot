@@ -20,6 +20,7 @@ public class GameRoom {
     private Team currentTeam;
     private Player currentExplainer;
     private Player currentGuesser;
+    private String currentWord;
     private boolean isGameStarted;
 
     public GameRoom(String id, Player host) {
