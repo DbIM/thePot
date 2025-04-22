@@ -6,6 +6,9 @@ export default function WelcomeScreen() {
     const [roomId, setRoomId] = useState("");
     const navigate = useNavigate();
 
+    // Сохраняем имя
+    localStorage.setItem("playerName", name);
+
     const createRoom = () => {
         fetch(`/api/game/create-room/${name}`, { method: "POST" })
             .then(res => res.text()) // потому что контроллер возвращает String
