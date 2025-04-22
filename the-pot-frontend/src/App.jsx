@@ -11,8 +11,8 @@ const App = () => {
         <Router>
             <Routes>
                 <Route path="/" element={<WelcomeScreen />} />
-                <Route path="/lobby" element={<LobbyScreen />} />
-                <Route path="/game" element={<GameScreen />} />
+                <Route path="/lobby/:roomId" element={<LobbyScreen />} />
+                <Route path="/game/:roomId" element={<GameScreen />} />
                 <Route path="/final" element={<FinalScreen />} />
             </Routes>
         </Router>

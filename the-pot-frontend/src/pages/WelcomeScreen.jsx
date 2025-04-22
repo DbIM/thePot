@@ -7,11 +7,10 @@ export default function WelcomeScreen() {
     const navigate = useNavigate();
 
     const createRoom = () => {
-        // пример REST запроса или WebSocket события
-        fetch("/api/createRoom", { method: "POST", body: JSON.stringify({ name }) })
-            .then(res => res.json())
-            .then(data => {
-                navigate(`/lobby/${data.roomId}`);
+        fetch(`/api/game/create-room/${name}`, { method: "POST" })
+            .then(res => res.text()) // потому что контроллер возвращает String
+            .then(roomId => {
+                navigate(`/lobby/${roomId}`);
             });
     };
 

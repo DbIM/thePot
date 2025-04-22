@@ -13,8 +13,7 @@ public class GameController {
     }
 
     @PostMapping("/create-room/{playerName}")
-    public String createRoom(
-            @RequestParam String playerName) {
+    public String createRoom(@PathVariable String playerName) {
         return gameService.createRoom(playerName);
     }
 
