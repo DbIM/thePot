@@ -1,36 +1,45 @@
-// WelcomeScreen.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const WelcomeScreen = () => {
+export default function WelcomeScreen() {
+    const [name, setName] = useState("");
+    const [roomId, setRoomId] = useState("");
     const navigate = useNavigate();
-    const [name, setName] = useState('');
 
-    const handleCreateRoom = () => {
-        if (!name.trim()) return;
-        localStorage.setItem('playerName', name);
-        navigate('/lobby/create');
+    const createRoom = () => {
+        // пример REST запроса или WebSocket события
+        fetch("/api/createRoom", { method: "POST", body: JSON.stringify({ name }) })
+            .then(res => res.json())
+            .then(data => {
+                navigate(`/lobby/${data.roomId}`);
+            });
     };
 
-    const handleJoinRoom = () => {
-        if (!name.trim()) return;
-        localStorage.setItem('playerName', name);
-        navigate('/lobby/join');
+    const joinRoom = () => {
+        navigate(`/lobby/${roomId}`);
     };
 
     return (
-        <div>
-            <h1>Добро пожаловать в игру "The Pot"</h1>
+        <div className="p-4 max-w-md mx-auto">
+            <h1 className="text-xl font-bold mb-4">Добро пожаловать!</h1>
             <input
-                type="text"
+                className="w-full border p-2 mb-2"
+                placeholder="Введите имя"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Введите ваше имя"
             />
-            <button onClick={handleCreateRoom}>Создать комнату</button>
-            <button onClick={handleJoinRoom}>Присоединиться к комнате</button>
+            <button className="w-full bg-blue-500 text-white p-2 mb-2" onClick={createRoom}>
+                Создать комнату
+            </button>
+            <input
+                className="w-full border p-2 mb-2"
+                placeholder="Код комнаты"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+            />
+            <button className="w-full bg-green-500 text-white p-2" onClick={joinRoom}>
+                Присоединиться
+            </button>
         </div>
     );
-};
-
-export default WelcomeScreen;
+}
