@@ -11,11 +11,16 @@ import java.util.List;
 public class Team {
     private String id;
     private List<Player> players;
+    private int score = 0;
 
     public void addPlayer(Player player) {
         if (this.players == null) {
             this.players = new ArrayList<>();
         }
         this.players.add(player);
+    }
+
+    public void incrementScore() {
+        this.score++;
     }
 }

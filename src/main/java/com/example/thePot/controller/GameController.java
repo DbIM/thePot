@@ -4,6 +4,7 @@ import com.example.thePot.dto.GameState;
 import com.example.thePot.player.Player;
 import com.example.thePot.player.Team;
 import com.example.thePot.room.GameRoom;
+import com.example.thePot.roundState.RoundState;
 import com.example.thePot.service.GameService;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,5 +55,26 @@ public class GameController {
     @GetMapping("/state/{roomId}")
     public GameState getGameState(@PathVariable String roomId) {
         return gameService.getGameState(roomId);
+    }
+
+    @PostMapping("/ready-to-explain")
+    public void readyToExplain(@RequestParam String roomId, @RequestParam String playerName) {
+        gameService.readyToExplain(roomId, playerName);
+    }
+
+    @GetMapping("/round-state/{roomId}")
+    public RoundState getRoundState(@PathVariable String roomId,
+                                    @RequestParam String playerName) {
+        return gameService.getRoundState(roomId, playerName);
+    }
+
+    @PostMapping("/guess-correct")
+    public void guessCorrect(@RequestParam String roomId, @RequestParam String playerName) {
+        gameService.guessCorrect(roomId, playerName);
+    }
+
+    @PostMapping("/skip-word")
+    public void skipWord(@RequestParam String roomId, @RequestParam String playerName) {
+        gameService.skipWord(roomId, playerName);
     }
 }

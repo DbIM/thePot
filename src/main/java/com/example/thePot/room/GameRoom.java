@@ -22,6 +22,9 @@ public class GameRoom {
     private Player currentGuesser;
     private String currentWord;
     private boolean isGameStarted;
+    private boolean timerStarted;
+    private long roundStartTime;
+
 
     public GameRoom(String id, Player host) {
         this.id = id;

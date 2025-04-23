@@ -4,6 +4,7 @@ import com.example.thePot.dto.GameState;
 import com.example.thePot.player.Player;
 import com.example.thePot.player.Team;
 import com.example.thePot.room.GameRoom;
+import com.example.thePot.roundState.RoundState;
 import com.example.thePot.timer.RoundTimer;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -27,6 +28,80 @@ public class GameService {
     public void init() {
         rooms.clear();
         log.info("Rooms cleared at startup.");
+    }
+
+    public void guessCorrect(String roomId, String playerName) {
+        GameRoom room = rooms.get(roomId);
+        if (room == null) return;
+
+        // Балл +1 команде объясняющего
+        Team team = room.getTeams().stream()
+                .filter(t -> t.getPlayers().contains(room.getCurrentExplainer()))
+                .findFirst().orElse(null);
+        if (team != null) {
+            team.incrementScore();
+        }
+
+        room.setCurrentWord(null);
+        if (!room.getRemainingWords().isEmpty()) {
+            room.setCurrentWord(room.getRemainingWords().remove(0));
+        } else {
+            endTurn(roomId); // если слов нет, конец хода
+        }
+    }
+
+    ////
+
+    public void readyToExplain(String roomId, String playerName) {
+        GameRoom room = getRoom(roomId);
+        if (room == null) {
+            throw new IllegalArgumentException("Комната не найдена");
+        }
+
+        if (!playerName.equals(room.getCurrentExplainer().getName())) {
+            throw new IllegalStateException("Ты не объясняющий игрок");
+        }
+
+        if (room.getRemainingWords().isEmpty()) {
+            throw new IllegalStateException("Нет оставшихся слов");
+        }
+
+        String word = room.getRemainingWords().remove(0);
+        room.setCurrentWord(word);
+
+        // Запускаем таймер
+        RoundTimer timer = new RoundTimer();
+        timer.startTimer(() -> endTurn(roomId));
+        timers.put(roomId, timer);
+
+        room.setTimerStarted(true);
+        room.setRoundStartTime(System.currentTimeMillis());
+    }
+
+    public RoundState getRoundState(String roomId, String playerName) {
+        GameRoom room = getRoom(roomId);
+        if (room == null) {
+            throw new IllegalArgumentException("Комната не найдена");
+        }
+
+        boolean isExplainer = playerName.equals(room.getCurrentExplainer().getName());
+        String word = isExplainer && room.isTimerStarted() ? room.getCurrentWord() : null;
+
+        int secondsLeft = room.isTimerStarted() ?
+                Math.max(0, 12 - (int)((System.currentTimeMillis() - room.getRoundStartTime()) / 1000))
+                : 12;
+
+        List<Integer> scores = room.getTeams().stream()
+                .map(Team::getScore)
+                .collect(Collectors.toList());
+
+        return new RoundState(
+                room.getCurrentExplainer().getName(),
+                room.isTimerStarted(),
+                word,
+                secondsLeft,
+                scores
+        );
     }
 
     public GameState getGameState(String roomId) {
@@ -66,6 +141,20 @@ public class GameService {
         } else {
             log.info("Player {} already in room {}", playerName, roomId);
         }
+    }
+
+    public void skipWord(String roomId, String playerName) {
+        GameRoom room = rooms.get(roomId);
+        if (room == null) return;
+
+        // Останавливаем таймер
+        RoundTimer timer = timers.get(roomId);
+        if (timer != null) {
+            timer.stopTimer(); // 💥 остановка таймера вручную (добавим stop метод)
+        }
+
+        // Завершаем ход и переходим к следующей команде
+        endTurn(roomId);
     }
 
     public void startGame(String roomId) {
@@ -146,7 +235,7 @@ public class GameService {
         timers.put(roomId, timer);
     }
 
-    private void endTurn(String roomId) {
+    public void endTurn(String roomId) {
         GameRoom room = rooms.get(roomId);
         if (room == null) return;
 

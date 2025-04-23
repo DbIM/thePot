@@ -21,15 +21,6 @@ export default function LobbyScreen() {
     }, [teams, roomId, navigate]);
 
     useEffect(() => {
-        const fetchRoom = async () => {
-            const res = await fetch(`/api/game/room/${roomId}`);
-            const data = await res.json();
-            setIsHost(data.host.name === yourName);
-        };
-        fetchRoom();
-    }, [roomId, yourName]);
-
-    useEffect(() => {
         console.log("👤 playerName in localStorage:", localStorage.getItem("playerName"));
 
         let storedName = localStorage.getItem("playerName");
