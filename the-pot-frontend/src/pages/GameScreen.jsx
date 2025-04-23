@@ -10,6 +10,7 @@ export default function GameScreen() {
     const [isExplainer, setIsExplainer] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const showWord = isExplainer && roundState.timerStarted && roundState.secondsLeft > 0 && roundState.word;
 
     const fetchRoundState = async () => {
         if (!roomId || !playerName) {
@@ -50,6 +51,7 @@ export default function GameScreen() {
             await fetch(`/api/game/guess-correct?roomId=${roomId}&playerName=${playerName}`, {
                 method: "POST",
             });
+            await fetchRoundState(); // 👈 сразу подгружаем новое слово
         } catch (err) {
             console.error("Ошибка при нажатии 'Угадано':", err);
             setError("Не удалось обработать 'Угадано'.");
@@ -61,6 +63,7 @@ export default function GameScreen() {
             await fetch(`/api/game/skip-word?roomId=${roomId}&playerName=${playerName}`, {
                 method: "POST",
             });
+            await fetchRoundState();
         } catch (err) {
             console.error("Ошибка при нажатии 'Стоп':", err);
             setError("Не удалось пропустить слово.");
@@ -75,28 +78,21 @@ export default function GameScreen() {
 
     if (!roundState) return <p className="text-center mt-10">Загрузка...</p>;
 
-    const showWord = isExplainer && roundState.timerStarted && roundState.secondsLeft > 0;
-
     return (
         <div className="max-w-lg mx-auto mt-10 p-4 border rounded-lg shadow">
             <h2 className="text-xl font-bold mb-2">Игра началась!</h2>
 
-            <p className="mb-1">
-                <strong>Ходит команда:</strong>{" "}
-                {typeof roundState.activeTeam === "number"
-                    ? `Команда ${roundState.activeTeam + 1}`
-                    : "—"}
-            </p>
+            <p><strong>Ходит команда:</strong> Команда {roundState.activeTeamIndex + 1}</p>
             <p className="mb-1">
                 <strong>Объясняет:</strong> {roundState.explainingPlayer || "Ожидание..."}
             </p>
-            <p className="mb-3">
+            <p className="mb-1">
                 <strong>Осталось времени:</strong>{" "}
-                {roundState.secondsLeft === 0 && (
-                    <div className="mt-4 text-center text-orange-600 font-semibold">
-                        Время вышло! Ход переходит следующей команде...
-                    </div>
-                )}
+                {roundState.secondsLeft > 0
+                    ? `${roundState.secondsLeft} сек.`
+                    : <span
+                        className="text-orange-600 font-semibold">Время вышло! Ход переходит следующей команде...</span>
+                }
             </p>
 
             {isExplainer && !roundState.timerStarted && (
