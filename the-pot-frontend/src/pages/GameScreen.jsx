@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function GameScreen() {
     const { roomId } = useParams();
@@ -10,11 +11,11 @@ export default function GameScreen() {
     const [isExplainer, setIsExplainer] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const showWord = isExplainer && roundState.timerStarted && roundState.secondsLeft > 0 && roundState.word;
+    const showWord = isExplainer && roundState?.timerStarted && roundState.secondsLeft > 0 && roundState.word;
 
     const fetchRoundState = async () => {
         if (!roomId || !playerName) {
-            navigate("/"); // если что-то не передано — вернём на главную
+            navigate("/");
             return;
         }
 
@@ -51,7 +52,7 @@ export default function GameScreen() {
             await fetch(`/api/game/guess-correct?roomId=${roomId}&playerName=${playerName}`, {
                 method: "POST",
             });
-            await fetchRoundState(); // 👈 сразу подгружаем новое слово
+            await fetchRoundState();
         } catch (err) {
             console.error("Ошибка при нажатии 'Угадано':", err);
             setError("Не удалось обработать 'Угадано'.");
@@ -79,25 +80,31 @@ export default function GameScreen() {
     if (!roundState) return <p className="text-center mt-10">Загрузка...</p>;
 
     return (
-        <div className="max-w-lg mx-auto mt-10 p-4 border rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-2">Игра началась!</h2>
+        <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-2xl shadow-lg bg-white">
+            <h2 className="text-2xl font-extrabold text-center mb-4 text-blue-700">
+                Игра началась!
+            </h2>
 
-            <p><strong>Ходит команда:</strong> Команда {roundState.activeTeamIndex + 1}</p>
-            <p className="mb-1">
-                <strong>Объясняет:</strong> {roundState.explainingPlayer || "Ожидание..."}
-            </p>
-            <p className="mb-1">
-                <strong>Осталось времени:</strong>{" "}
-                {roundState.secondsLeft > 0
-                    ? `${roundState.secondsLeft} сек.`
-                    : <span
-                        className="text-orange-600 font-semibold">Время вышло! Ход переходит следующей команде...</span>
-                }
-            </p>
+            <div className="text-center mb-4 text-lg">
+                {roundState.secondsLeft > 0 ? (
+                    <span className="text-green-700 font-semibold">
+                        ⏱ Осталось времени: {roundState.secondsLeft} сек.
+                    </span>
+                ) : (
+                    <span className="text-red-600 font-semibold animate-pulse">
+                        ⌛ Время вышло! Ход переходит следующей команде...
+                    </span>
+                )}
+            </div>
+
+            <div className="text-center mb-2">
+                <p><strong>Ходит команда:</strong> Команда {roundState.activeTeamIndex + 1}</p>
+                <p><strong>Объясняет:</strong> {roundState.explainingPlayer || "Ожидание..."}</p>
+            </div>
 
             {isExplainer && !roundState.timerStarted && (
                 <button
-                    className="bg-green-600 text-white px-4 py-2 rounded w-full"
+                    className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded w-full font-semibold"
                     onClick={handleReady}
                     disabled={loading}
                 >
@@ -106,62 +113,74 @@ export default function GameScreen() {
             )}
 
             {showWord && (
-                <div className="mt-4 text-center">
-                    <p className="text-lg font-semibold">Твое слово:</p>
-                    <div className="text-2xl font-bold mt-2 bg-yellow-200 p-3 rounded mb-4">
-                        {roundState.word}
-                    </div>
-                    <div className="flex gap-2">
+                <motion.div
+                    className="mt-4 p-6 bg-yellow-100 rounded-xl shadow-md text-center"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                >
+                    <p className="text-lg font-semibold text-gray-700">Твое слово:</p>
+                    <p className="text-3xl font-bold text-yellow-800 mt-2">{roundState.word}</p>
+
+                    <div className="flex gap-4 mt-4">
                         <button
-                            className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+                            className="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded w-full font-semibold"
                             onClick={handleGuessed}
                         >
-                            Угадано
+                            ✅ Угадано
                         </button>
                         <button
-                            className="bg-red-600 text-white px-4 py-2 rounded w-full"
+                            className="bg-red-600 hover:bg-red-700 transition text-white px-4 py-2 rounded w-full font-semibold"
                             onClick={handleStop}
                         >
-                            Стоп
+                            🔁 Пропустить
                         </button>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {!isExplainer && roundState.timerStarted && (
                 <div className="mt-4 text-center text-gray-700">
-                    Раунд идёт… ждём объяснение!
+                    ⏳ Раунд идёт… ждём объяснение!
                 </div>
             )}
 
             {roundState.teams && (
                 <div className="mt-6">
-                    <h3 className="font-semibold mb-1">Состав команд:</h3>
-                    {roundState.teams.map((team, idx) => (
-                        <div key={idx} className="mb-2">
-                            <p className="font-bold">Команда {idx + 1}:</p>
-                            <ul className="list-disc list-inside text-gray-800">
-                                {team.map((player) => (
-                                    <li key={player}>{player}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    <h3 className="text-lg font-semibold mb-2">Состав команд:</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {roundState.teams.map((team, idx) => (
+                            <div key={idx} className={`rounded-lg border p-3 ${idx === roundState.activeTeamIndex ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}`}>
+                                <p className="font-bold mb-2">Команда {idx + 1}</p>
+                                <ul className="text-sm text-gray-800 space-y-1">
+                                    {team.map((player) => (
+                                        <li key={player}>👤 {player}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
             {roundState.teamScores && (
-                <div className="mt-4">
-                    <h3 className="font-semibold mb-1">Очки команд:</h3>
-                    <ul className="list-disc pl-5 text-gray-800">
+                <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">Очки команд:</h3>
+                    <div className="flex gap-4 flex-wrap">
                         {roundState.teamScores.map((score, idx) => (
-                            <li key={idx}>Команда {idx + 1}: {score} очков</li>
+                            <div key={idx} className="bg-gray-100 px-4 py-2 rounded shadow text-sm">
+                                🟢 Команда {idx + 1}: <span className="font-bold">{score}</span> очков
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
             )}
 
-            {error && <p className="text-red-600 mt-4">{error}</p>}
+            {error && (
+                <p className="mt-4 text-red-600 font-medium text-center bg-red-100 px-4 py-2 rounded">
+                    ❗ {error}
+                </p>
+            )}
         </div>
     );
 }

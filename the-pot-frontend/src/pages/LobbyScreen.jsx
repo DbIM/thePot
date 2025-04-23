@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function LobbyScreen() {
     const { roomId } = useParams();
@@ -15,14 +14,12 @@ export default function LobbyScreen() {
         if (teams.length > 0) {
             const timeout = setTimeout(() => {
                 navigate(`/game/${roomId}`);
-            }, 3000); // ждём 3 секунды и уходим на игру
+            }, 3000);
             return () => clearTimeout(timeout);
         }
     }, [teams, roomId, navigate]);
 
     useEffect(() => {
-        console.log("👤 playerName in localStorage:", localStorage.getItem("playerName"));
-
         let storedName = localStorage.getItem("playerName");
         if (!storedName) {
             storedName = prompt("Введите ваше имя:");
@@ -46,7 +43,6 @@ export default function LobbyScreen() {
             try {
                 const res = await fetch(`/api/game/room/${roomId}/players`);
                 const data = await res.json();
-                console.log("Получены игроки:", data);
                 setPlayers(data);
             } catch (err) {
                 console.error("Ошибка при получении игроков:", err);
@@ -74,7 +70,7 @@ export default function LobbyScreen() {
             const startGame = async () => {
                 try {
                     await fetch(`/api/game/start/${roomId}`, { method: "POST" });
-                    fetchTeams(); // потом показать команды
+                    fetchTeams();
                 } catch (e) {
                     console.error("Ошибка при старте игры:", e);
                 }
@@ -103,7 +99,7 @@ export default function LobbyScreen() {
             });
 
             if (!res.ok) {
-                const text = await res.text(); // читаем текст ошибки!
+                const text = await res.text();
                 alert(`Ошибка: ${text}`);
                 return;
             }
@@ -115,35 +111,40 @@ export default function LobbyScreen() {
     };
 
     return (
-        <div className="p-4 max-w-lg mx-auto">
-            <h2 className="text-lg font-semibold">Комната: {roomId}</h2>
-            <h3 className="mt-4 font-bold">Игроки:</h3>
-            <ul className="mb-4">
+        <div className="p-6 max-w-xl mx-auto mt-10 bg-white rounded-2xl shadow-lg">
+            <h2 className="text-xl font-bold text-blue-700 mb-4 text-center">Лобби — Комната: {roomId}</h2>
+
+            <h3 className="text-lg font-semibold mb-2">👥 Игроки:</h3>
+            <ul className="mb-4 space-y-1">
                 {players.map((p, i) => (
-                    <li key={i}>
-                        {p.name} {p.ready ? "✅" : "❌"}
+                    <li key={i} className="flex items-center justify-between border-b pb-1">
+                        <span>{p.name}</span>
+                        <span>{p.ready ? "✅" : "⌛"}</span>
                     </li>
                 ))}
             </ul>
 
             {!isReady ? (
-                <div>
-                    <h3>Введите 3 слова:</h3>
+                <div className="space-y-2">
+                    <h3 className="text-md font-medium">📝 Введите 3 слова:</h3>
                     {words.map((word, index) => (
                         <input
                             key={index}
-                            className="w-full border p-2 mb-2"
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
                             value={word}
                             onChange={(e) => handleWordChange(e.target.value, index)}
                             placeholder={`Слово ${index + 1}`}
                         />
                     ))}
-                    <button className="bg-blue-500 text-white p-2 w-full" onClick={confirmWords}>
-                        Подтвердить слова
+                    <button
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition mt-2"
+                        onClick={confirmWords}
+                    >
+                        ✅ Подтвердить слова
                     </button>
                 </div>
             ) : (
-                <p className="text-green-600 font-bold">Вы готовы! Ждём остальных…</p>
+                <p className="text-green-600 text-center font-semibold mt-4">Готово! Ждём остальных…</p>
             )}
         </div>
     );

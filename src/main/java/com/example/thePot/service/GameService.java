@@ -95,12 +95,15 @@ public class GameService {
                 .map(Team::getScore)
                 .collect(Collectors.toList());
 
+        int activeTeamIndex = room.getTeams().indexOf(room.getCurrentTeam());
+
         return new RoundState(
                 room.getCurrentExplainer().getName(),
                 room.isTimerStarted(),
                 word,
                 secondsLeft,
-                scores
+                scores,
+                activeTeamIndex
         );
     }
 
@@ -147,14 +150,16 @@ public class GameService {
         GameRoom room = rooms.get(roomId);
         if (room == null) return;
 
-        // Останавливаем таймер
         RoundTimer timer = timers.get(roomId);
         if (timer != null) {
-            timer.stopTimer(); // 💥 остановка таймера вручную (добавим stop метод)
+            timer.stopTimer();
         }
 
-        // Завершаем ход и переходим к следующей команде
-        endTurn(roomId);
+        room.setTimerStarted(false); // ⚠️ сброс флага таймера
+        room.setRoundStartTime(0);   // сброс времени начала
+        room.setCurrentWord(null);   // ⚠️ убираем текущее слово
+
+        endTurn(roomId); // переходим к следующей команде
     }
 
     public void startGame(String roomId) {
@@ -226,13 +231,9 @@ public class GameService {
         selectFirstTeam(room);
         selectNextExplainer(room);
 
-        if (!room.getRemainingWords().isEmpty()) {
-            room.setCurrentWord(room.getRemainingWords().remove(0));
-        }
-
-        RoundTimer timer = new RoundTimer();
-        timer.startTimer(() -> endTurn(roomId));
-        timers.put(roomId, timer);
+        room.setTimerStarted(false); // 🧠 ВАЖНО: сброс перед новым объяснением
+        room.setRoundStartTime(0);   // сбросим время начала тоже
+        room.setCurrentWord(null);   // сброс слова
     }
 
     public void endTurn(String roomId) {
@@ -244,7 +245,10 @@ public class GameService {
         room.setCurrentTeam(room.getTeams().get(nextIndex));
 
         selectNextExplainer(room);
-        startRound(roomId);
+
+        room.setTimerStarted(false);
+        room.setRoundStartTime(0);
+        room.setCurrentWord(null);
     }
 
     private void selectNextExplainer(GameRoom room) {

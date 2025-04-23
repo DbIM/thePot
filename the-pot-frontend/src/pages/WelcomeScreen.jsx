@@ -6,12 +6,11 @@ export default function WelcomeScreen() {
     const [roomId, setRoomId] = useState("");
     const navigate = useNavigate();
 
-    // Сохраняем имя
     localStorage.setItem("playerName", name);
 
     const createRoom = () => {
         fetch(`/api/game/create-room/${name}`, { method: "POST" })
-            .then(res => res.text()) // потому что контроллер возвращает String
+            .then(res => res.text())
             .then(roomId => {
                 navigate(`/lobby/${roomId}`);
             });
@@ -22,25 +21,31 @@ export default function WelcomeScreen() {
     };
 
     return (
-        <div className="p-4 max-w-md mx-auto">
-            <h1 className="text-xl font-bold mb-4">Добро пожаловать!</h1>
+        <div className="p-6 max-w-md mx-auto mt-20 bg-white rounded-2xl shadow-lg text-center space-y-4">
+            <h1 className="text-2xl font-bold text-blue-700">🎉 Добро пожаловать!</h1>
             <input
-                className="w-full border p-2 mb-2"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 placeholder="Введите имя"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
             />
-            <button className="w-full bg-blue-500 text-white p-2 mb-2" onClick={createRoom}>
-                Создать комнату
+            <button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+                onClick={createRoom}
+            >
+                🚀 Создать комнату
             </button>
             <input
-                className="w-full border p-2 mb-2"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
                 placeholder="Код комнаты"
                 value={roomId}
                 onChange={(e) => setRoomId(e.target.value)}
             />
-            <button className="w-full bg-green-500 text-white p-2" onClick={joinRoom}>
-                Присоединиться
+            <button
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
+                onClick={joinRoom}
+            >
+                🔑 Присоединиться
             </button>
         </div>
     );
